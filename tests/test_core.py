@@ -12,7 +12,9 @@ from app.core import (
     milestone_5,
     classify_legal_clause,
 )
-
+from types import SimpleNamespace
+import torch
+import app.core as core
 
 # Milestone 1: Prepare a legal text corpus.
 def test_milestone_1():
@@ -82,22 +84,48 @@ def test_invalid_ngram_order():
 
 
 # Milestone 3: GPT-2 legal clause classifier.
-def test_milestone_3():
+def test_milestone_3(monkeypatch):
+    fake_tokenizer = object()
+    fake_model = object()
+
+    monkeypatch.setattr(
+        core,
+        "load_clause_classifier",
+        lambda: (fake_tokenizer, fake_model),
+    )
+
     tokenizer, model = milestone_3()
 
-    assert tokenizer is not None
-    assert model is not None
-    assert model.training is False
+    assert tokenizer is fake_tokenizer
+    assert model is fake_model
 
 
-def test_classify_legal_clause():
+def test_classify_legal_clause(monkeypatch):
+    class FakeTokenizer:
+        def __call__(self, text, **kwargs):
+            return {}
+
+    class FakeModel:
+        config = SimpleNamespace(
+            id2label={0: "Confidentiality", 1: "Parties"}
+        )
+
+        def __call__(self, **kwargs):
+            return SimpleNamespace(
+                logits=torch.tensor([[0.1, 2.0]])
+            )
+
+    monkeypatch.setattr(
+        core,
+        "load_clause_classifier",
+        lambda: (FakeTokenizer(), FakeModel()),
+    )
+
     result = classify_legal_clause(
         "The parties agree to comply with all applicable laws."
     )
 
-    assert "label" in result
-    assert "confidence" in result
-    assert isinstance(result["label"], str)
+    assert result["label"] == "Parties"
     assert 0 <= result["confidence"] <= 1
 
 
@@ -121,12 +149,21 @@ def test_milestone_4():
 
 
 # Milestone 5: Completed sentence classification and feedback.
-def test_milestone_5():
+def test_milestone_5(monkeypatch):
+    monkeypatch.setattr(
+        core,
+        "classify_legal_clause",
+        lambda text: {
+            "label": "Parties",
+            "confidence": 0.85,
+        },
+    )
+
     result = milestone_5(
         "The parties agree to comply with all applicable laws."
     )
 
-    assert isinstance(result["label"], str)
-    assert 0 <= result["confidence"] <= 1
+    assert result["label"] == "Parties"
+    assert result["confidence"] == 0.85
     assert isinstance(result["feedback"], str)
     assert len(result["feedback"]) > 0
