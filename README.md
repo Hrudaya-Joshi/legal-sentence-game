@@ -96,8 +96,6 @@ legal-sentence-game/
 │   ├── __init__.py
 │   ├── cli.py
 │   ├── core.py
-│   ├── llm.py
-│   ├── storage.py
 │   └── train_classifier.py
 ├── data/
 │   └── legal_corpus.txt
@@ -121,8 +119,6 @@ In the initial training run, the classifier achieved **63.33% validation accurac
 This is an initial result from a small training experiment, not a benchmark of production-level performance.
 
 ## Settings and secrets
-
-The project includes an optional `.env` configuration for the chat integration in `app/llm.py`.
 
 Never commit `.env` or expose API keys in source code. Use `.env.example` as a configuration reference.
 
