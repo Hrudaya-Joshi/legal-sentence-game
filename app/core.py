@@ -3,7 +3,8 @@
 from collections import defaultdict, Counter
 import re
 from pathlib import Path
-
+import torch
+from transformers import AutoTokenizer, GPT2ForSequenceClassification
 
 # Location of the legal text corpus.
 CORPUS_PATH = Path(__file__).resolve().parent.parent / "data" / "legal_corpus.txt"
@@ -90,8 +91,79 @@ def milestone_2():
 
 
 # --- Milestone 3: Load the fine-tuned GPT-2 model for legal clause classification.
+
+# Milestone 3: GPT-2 legal clause classification
+
+MODEL_DIR = (
+    Path(__file__).resolve().parent.parent
+    / "models"
+    / "legal-clause-classifier"
+)
+
+_classifier = None
+_tokenizer = None
+
+
+def load_clause_classifier():
+    """Load the locally fine-tuned GPT-2 classifier."""
+    global _classifier, _tokenizer
+
+    if _classifier is None or _tokenizer is None:
+        if not MODEL_DIR.exists():
+            raise FileNotFoundError(
+                f"Trained model not found: {MODEL_DIR}"
+            )
+
+        _tokenizer = AutoTokenizer.from_pretrained(
+            MODEL_DIR,
+            local_files_only=True,
+        )
+
+        _classifier = GPT2ForSequenceClassification.from_pretrained(
+            MODEL_DIR,
+            local_files_only=True,
+        )
+
+        _classifier.eval()
+
+    return _tokenizer, _classifier
+
+
+def classify_legal_clause(text: str) -> dict:
+    """Classify a legal sentence and return its label and confidence."""
+    if not isinstance(text, str):
+        raise TypeError("text must be a string")
+
+    if not text.strip():
+        raise ValueError("text cannot be empty")
+
+    tokenizer, model = load_clause_classifier()
+
+    inputs = tokenizer(
+        text,
+        return_tensors="pt",
+        truncation=True,
+        max_length=96,
+    )
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+        probabilities = torch.softmax(outputs.logits, dim=-1)
+
+    predicted_id = probabilities.argmax(dim=-1).item()
+    confidence = probabilities[0][predicted_id].item()
+
+    label = model.config.id2label[predicted_id]
+
+    return {
+        "label": label,
+        "confidence": confidence,
+    }
+
+
 def milestone_3():
-    raise NotImplementedError("TODO(milestone 3)")
+    """Load the trained legal clause classifier."""
+    return load_clause_classifier()
 
 
 # --- Milestone 4: Create a CLI game interface presenting partial legal sentences.

@@ -3,7 +3,7 @@ import pytest
 
 from app.core import prepare_legal_corpus, milestone_1
 from app.core import build_ngram_model, predict_next_word
-
+from app.core import classify_legal_clause
 # Milestone 1: Prepare a legal text corpus.
 def test_milestone_1():
     # Test text cleaning.
@@ -89,3 +89,23 @@ def test_build_trigram_model():
 def test_invalid_ngram_order():
     with pytest.raises(ValueError):
         build_ngram_model(["the", "court"], n=1)
+
+def test_classify_legal_clause():
+    result = classify_legal_clause(
+        "The parties agree to comply with all applicable laws."
+    )
+
+    assert "label" in result
+    assert "confidence" in result
+    assert isinstance(result["label"], str)
+    assert 0 <= result["confidence"] <= 1
+
+
+def test_classify_empty_sentence():
+    with pytest.raises(ValueError):
+        classify_legal_clause("")
+
+
+def test_classify_invalid_input():
+    with pytest.raises(TypeError):
+        classify_legal_clause(123)
