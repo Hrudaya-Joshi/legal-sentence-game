@@ -2,7 +2,7 @@
 import pytest
 
 from app.core import prepare_legal_corpus, milestone_1
-
+from app.core import build_ngram_model, predict_next_word
 
 # Milestone 1: Prepare a legal text corpus.
 def test_milestone_1():
@@ -59,3 +59,33 @@ def test_milestone_4():
 @pytest.mark.skip(reason="remove this line when you start milestone 5")
 def test_milestone_5():
     raise NotImplementedError("write the test for milestone 5")
+
+def test_build_bigram_model():
+    tokens = ["the", "court", "shall", "the", "court", "may"]
+
+    model = build_ngram_model(tokens, n=2)
+
+    assert model[("the",)]["court"] == 2
+    assert model[("court",)]["shall"] == 1
+    assert model[("court",)]["may"] == 1
+
+
+def test_predict_next_word():
+    tokens = ["the", "court", "shall", "the", "court", "may"]
+    model = build_ngram_model(tokens, n=2)
+
+    assert predict_next_word(model, ["the"]) == "court"
+    assert predict_next_word(model, ["unknown"]) is None
+
+
+def test_build_trigram_model():
+    tokens = ["the", "court", "shall", "the", "court", "shall"]
+
+    model = build_ngram_model(tokens, n=3)
+
+    assert model[("the", "court")]["shall"] == 2
+
+
+def test_invalid_ngram_order():
+    with pytest.raises(ValueError):
+        build_ngram_model(["the", "court"], n=1)

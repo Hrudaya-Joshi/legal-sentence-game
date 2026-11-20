@@ -1,6 +1,6 @@
 
 """Core functionality for the Legal Sentence Game."""
-
+from collections import defaultdict, Counter
 import re
 from pathlib import Path
 
@@ -48,8 +48,45 @@ def milestone_1() -> list[str]:
 
 
 # --- Milestone 2: Implement the n-gram next-word predictor.
+def build_ngram_model(tokens: list[str], n: int = 2) -> dict:
+    """Build an n-gram model from a list of tokens."""
+    if not isinstance(tokens, list):
+        raise TypeError("tokens must be a list")
+
+    if n < 2:
+        raise ValueError("n must be at least 2")
+
+    model = defaultdict(Counter)
+
+    for i in range(len(tokens) - n + 1):
+        context = tuple(tokens[i:i + n - 1])
+        next_word = tokens[i + n - 1]
+        model[context][next_word] += 1
+
+    return dict(model)
+
+
+def predict_next_word(model: dict, context: list[str]) -> str | None:
+    """Predict the most common next word for the given context."""
+    if not isinstance(context, list):
+        raise TypeError("context must be a list")
+
+    if not context:
+        return None
+
+    context_key = tuple(context)
+    predictions = model.get(context_key)
+
+    if not predictions:
+        return None
+
+    return predictions.most_common(1)[0][0]
+
+
 def milestone_2():
-    raise NotImplementedError("TODO(milestone 2)")
+    """Build a bigram model using the prepared legal corpus."""
+    tokens = milestone_1()
+    return build_ngram_model(tokens, n=2)
 
 
 # --- Milestone 3: Load the fine-tuned GPT-2 model for legal clause classification.
