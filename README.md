@@ -1,6 +1,8 @@
 # Legal Sentence Game
 
-[![Built with askThili](https://ask.thili.ai/api/v1/public/projects/dpcpzmpr3b/badge.svg)](https://ask.thili.ai/b/dpcpzmpr3b)
+
+[![Built with askThili](https://msrit.ask.thili.ai/api/v1/public/projects/dpcpzmpr3b/badge.svg)](https://msrit.ask.thili.ai/b/dpcpzmpr3b)
+
 
 This project develops a command-line game for law students to practice drafting legal sentences. Players complete partial sentences using n-gram predictions, and a fine-tuned GPT-2 model provides instant feedback on the generated clause types. It's a fun way to hone legal drafting skills.
 
