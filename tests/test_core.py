@@ -1,12 +1,21 @@
 
 import pytest
 
-from app.core import prepare_legal_corpus, milestone_1
-from app.core import build_ngram_model, predict_next_word
-from app.core import classify_legal_clause
+from app.core import (
+    prepare_legal_corpus,
+    milestone_1,
+    build_ngram_model,
+    predict_next_word,
+    milestone_2,
+    milestone_3,
+    milestone_4,
+    milestone_5,
+    classify_legal_clause,
+)
+
+
 # Milestone 1: Prepare a legal text corpus.
 def test_milestone_1():
-    # Test text cleaning.
     text = "THE Court shall enforce this Agreement!"
 
     tokens = prepare_legal_corpus(text)
@@ -15,13 +24,9 @@ def test_milestone_1():
         "the", "court", "shall", "enforce", "this", "agreement"
     ]
 
-    # Test that punctuation is removed.
     assert "!" not in tokens
-
-    # Test that all words are lowercase.
     assert all(token == token.lower() for token in tokens)
 
-    # Test actual legal corpus loading.
     corpus = milestone_1()
 
     assert len(corpus) > 0
@@ -35,30 +40,15 @@ def test_empty_text():
 def test_invalid_text():
     with pytest.raises(TypeError):
         prepare_legal_corpus(123)
-    
 
-# Milestone 2
-@pytest.mark.skip(reason="remove this line when you start milestone 2")
+
+# Milestone 2: N-gram prediction.
 def test_milestone_2():
-    raise NotImplementedError("write the test for milestone 2")
+    model = milestone_2()
 
+    assert isinstance(model, dict)
+    assert len(model) > 0
 
-# Milestone 3
-@pytest.mark.skip(reason="remove this line when you start milestone 3")
-def test_milestone_3():
-    raise NotImplementedError("write the test for milestone 3")
-
-
-# Milestone 4
-@pytest.mark.skip(reason="remove this line when you start milestone 4")
-def test_milestone_4():
-    raise NotImplementedError("write the test for milestone 4")
-
-
-# Milestone 5
-@pytest.mark.skip(reason="remove this line when you start milestone 5")
-def test_milestone_5():
-    raise NotImplementedError("write the test for milestone 5")
 
 def test_build_bigram_model():
     tokens = ["the", "court", "shall", "the", "court", "may"]
@@ -90,6 +80,16 @@ def test_invalid_ngram_order():
     with pytest.raises(ValueError):
         build_ngram_model(["the", "court"], n=1)
 
+
+# Milestone 3: GPT-2 legal clause classifier.
+def test_milestone_3():
+    tokenizer, model = milestone_3()
+
+    assert tokenizer is not None
+    assert model is not None
+    assert model.training is False
+
+
 def test_classify_legal_clause():
     result = classify_legal_clause(
         "The parties agree to comply with all applicable laws."
@@ -109,3 +109,24 @@ def test_classify_empty_sentence():
 def test_classify_invalid_input():
     with pytest.raises(TypeError):
         classify_legal_clause(123)
+
+
+# Milestone 4: CLI game model.
+def test_milestone_4():
+    model = milestone_4()
+
+    assert isinstance(model, dict)
+    assert len(model) > 0
+    assert predict_next_word(model, ["the"]) == "parties"
+
+
+# Milestone 5: Completed sentence classification and feedback.
+def test_milestone_5():
+    result = milestone_5(
+        "The parties agree to comply with all applicable laws."
+    )
+
+    assert isinstance(result["label"], str)
+    assert 0 <= result["confidence"] <= 1
+    assert isinstance(result["feedback"], str)
+    assert len(result["feedback"]) > 0

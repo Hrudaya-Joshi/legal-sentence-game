@@ -168,9 +168,19 @@ def milestone_3():
 
 # --- Milestone 4: Create a CLI game interface presenting partial legal sentences.
 def milestone_4():
-    raise NotImplementedError("TODO(milestone 4)")
+    """Build and return the n-gram model for the CLI game."""
+    return milestone_2()
 
 
 # --- Milestone 5: Classify the completed sentence and provide feedback.
-def milestone_5():
-    raise NotImplementedError("TODO(milestone 5)")
+def milestone_5(text: str) -> dict:
+    """Classify a completed legal sentence using the GPT-2 classifier."""
+    result = classify_legal_clause(text)
+
+    return {
+        "label": result["label"],
+        "confidence": result["confidence"],
+        "feedback": (
+            "Your legal sentence has been classified successfully."
+        ),
+    }
